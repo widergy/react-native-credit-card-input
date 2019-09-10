@@ -18,6 +18,10 @@ export default class CCFieldValidator {
 
   validateValues = (formValues) => {
     const numberValidation = valid.number(formValues.number);
+    if (formValues.type === "maestro" && formValues.number.length === 22) {
+      numberValidation.isPotentiallyValid = true;
+      numberValidation.isValid = true;
+    }
     const expiryValidation = valid.expirationDate(formValues.expiry);
     const maxCVCLength = (numberValidation.card || FALLBACK_CARD).code.size;
     const cvcValidation = valid.cvv(formValues.cvc, maxCVCLength);
