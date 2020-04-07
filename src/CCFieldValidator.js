@@ -2,12 +2,11 @@ import valid from "card-validator";
 import pick from "lodash.pick";
 import values from "lodash.values";
 import every from "lodash.every";
-import { CARDS_OVERRIDES, VALID, INCOMPLETE, CABAL_CARD_TYPE } from "./constants";
+import { CARDS_OVERRIDES, VALID, INCOMPLETE } from "./constants";
 import { toStatus, maestroCardStatus } from "./utils";
 
 
 CARDS_OVERRIDES.forEach(card => valid.creditCardType.addCard(card));
-valid.creditCardType.addCard(CABAL_CARD_TYPE);
 
 const FALLBACK_CARD = { gaps: [4, 8, 12], lengths: [16], code: { size: 3 } };
 export default class CCFieldValidator {
