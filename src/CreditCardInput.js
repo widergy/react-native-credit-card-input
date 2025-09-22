@@ -2,12 +2,13 @@ import React, { Component, Fragment } from "react";
 import PropTypes from "prop-types";
 import ReactNative, {
   NativeModules,
-  UIManager,
   View,
+  Text,
   StyleSheet,
   ScrollView,
   Dimensions,
   TextInput,
+  ViewPropTypes,
 } from "react-native";
 
 import CreditCard from "./CardView";
@@ -65,10 +66,10 @@ const POSTAL_CODE_INPUT_WIDTH = 120; // https://github.com/yannickcr/eslint-plug
     placeholders: PropTypes.object,
     cardPlaceholders: PropTypes.object,
 
-    labelStyle: PropTypes.any,
-    inputStyle: PropTypes.any,
-    inputContainerStyle: PropTypes.any,
-    containerStyle: PropTypes.any,
+    labelStyle: Text.propTypes.style,
+    inputStyle: Text.propTypes.style,
+    inputContainerStyle: ViewPropTypes.style,
+    containerStyle: ViewPropTypes.style,
 
     validColor: PropTypes.string,
     invalidColor: PropTypes.string,
@@ -123,104 +124,31 @@ const POSTAL_CODE_INPUT_WIDTH = 120; // https://github.com/yannickcr/eslint-plug
     additionalInputsProps: {},
   };
 
-  constructor(props) {
-    super(props);
-    this.formRef = React.createRef();
-    this.fieldRefs = {};
-    this._setFieldRef = this._setFieldRef.bind(this);
-  }
-
-  componentDidMount() {
-    this._focus(this.props.focused);
-  }
+  componentDidMount = () => this._focus(this.props.focused);
 
   componentWillReceiveProps = newProps => {
     if (this.props.focused !== newProps.focused) this._focus(newProps.focused);
   };
 
-  _setFieldRef(field) {
-    return ref => {
-      this.fieldRefs[field] = ref;
-    };
-  }
-
   _focus = field => {
     if (!field) return;
 
-    const scrollResponder = this.formRef.current && this.formRef.current.getScrollResponder && this.formRef.current.getScrollResponder();
-    const fieldInstance = this.fieldRefs[field];
+    const scrollResponder = this.refs.Form.getScrollResponder();
+    const nodeHandle = ReactNative.findNodeHandle(this.refs[field]);
 
-    const inputNode = fieldInstance && (fieldInstance.inputRef && fieldInstance.inputRef.current ? fieldInstance.inputRef.current : fieldInstance);
-    const nodeHandle = ReactNative.findNodeHandle(inputNode);
-    const scrollNodeHandle = ReactNative.findNodeHandle(this.formRef.current);
-
-    const handleSuccess = x => {
-      if (scrollResponder && scrollResponder.scrollTo) {
+    NativeModules.UIManager.measureLayoutRelativeToParent(
+      nodeHandle,
+      e => {
+        throw e;
+      },
+      x => {
         scrollResponder.scrollTo({
           x: Math.max(x - PREVIOUS_FIELD_OFFSET, 0),
           animated: true,
         });
+        this.refs[field].focus();
       }
-      if (fieldInstance && typeof fieldInstance.focus === "function") {
-        fieldInstance.focus();
-      }
-    };
-
-    if (UIManager && typeof UIManager.measureLayout === "function") {
-      try {
-        UIManager.measureLayout(
-          nodeHandle,
-          scrollNodeHandle,
-          e => {
-            throw e;
-          },
-          x => handleSuccess(x)
-        );
-        return;
-      } catch (e) {
-        // continue other fallbacks
-      }
-    }
-    if (NativeModules && NativeModules.UIManager && typeof NativeModules.UIManager.measureLayoutRelativeToParent === "function") {
-      NativeModules.UIManager.measureLayoutRelativeToParent(
-        nodeHandle,
-        e => {
-          throw e;
-        },
-        x => handleSuccess(x)
-      );
-      return;
-    }
-
-    if (inputNode && typeof inputNode.measureLayout === "function") {
-      inputNode.measureLayout(
-        scrollNodeHandle,
-        x => handleSuccess(x),
-        e => {
-          throw e;
-        }
-      );
-      return;
-    }
-
-    if (inputNode && typeof inputNode.measure === "function") {
-      inputNode.measure((x, y, width, height, pageX) => {
-        if (scrollResponder && scrollResponder.scrollTo) {
-          scrollResponder.scrollTo({
-            x: Math.max(pageX - PREVIOUS_FIELD_OFFSET, 0),
-            animated: true,
-          });
-        }
-        if (fieldInstance && typeof fieldInstance.focus === "function") {
-          fieldInstance.focus();
-        }
-      });
-      return;
-    }
-
-    if (fieldInstance && typeof fieldInstance.focus === "function") {
-      fieldInstance.focus();
-    }
+    );
   };
 
   _inputProps = field => {
@@ -248,6 +176,7 @@ const POSTAL_CODE_INPUT_WIDTH = 120; // https://github.com/yannickcr/eslint-plug
       validColor,
       invalidColor,
       placeholderColor,
+      ref: field,
       field,
 
       label: labels[field],
@@ -300,7 +229,6 @@ const POSTAL_CODE_INPUT_WIDTH = 120; // https://github.com/yannickcr/eslint-plug
       <Fragment>
         <CCInput
           {...this._inputProps("number")}
-          ref={this._setFieldRef("number")}
           cancelScrollOnValidNumber={cancelScrollOnValidNumber}
           keyboardType="numeric"
           containerStyle={[
@@ -315,7 +243,6 @@ const POSTAL_CODE_INPUT_WIDTH = 120; // https://github.com/yannickcr/eslint-plug
       <Fragment>
         <CCInput
           {...this._inputProps("expiry")}
-          ref={this._setFieldRef("expiry")}
           keyboardType="numeric"
           containerStyle={[
             inputContainerStyle,
@@ -324,7 +251,6 @@ const POSTAL_CODE_INPUT_WIDTH = 120; // https://github.com/yannickcr/eslint-plug
           {requiresCVC && !isAmex && (
             <CCInput
               {...this._inputProps("cvc")}
-              ref={this._setFieldRef("cvc")}
               isLast={!requiresPostalCode && !requiresName}
               keyboardType="numeric"
               containerStyle={[
@@ -336,7 +262,6 @@ const POSTAL_CODE_INPUT_WIDTH = 120; // https://github.com/yannickcr/eslint-plug
           {requiresCVC && isAmex && (
             <CCInput
               {...this._inputProps("cvc")}
-              ref={this._setFieldRef("cvc")}
               isLast={!requiresPostalCode && !requiresName}
               keyboardType="numeric"
               containerStyle={[
@@ -352,7 +277,6 @@ const POSTAL_CODE_INPUT_WIDTH = 120; // https://github.com/yannickcr/eslint-plug
     const cardNameInput = requiresName && (
       <CCInput
         {...this._inputProps("name")}
-        ref={this._setFieldRef("name")}
         isLast={!requiresPostalCode && requiresName}
         containerStyle={[
           inputContainerStyle,
@@ -363,7 +287,6 @@ const POSTAL_CODE_INPUT_WIDTH = 120; // https://github.com/yannickcr/eslint-plug
     const cardPostalCodeInput = requiresPostalCode && (
       <CCInput
         {...this._inputProps("postalCode")}
-        ref={this._setFieldRef("postalCode")}
         keyboardType="numeric"
         isLast={requiresPostalCode}
         containerStyle={[
@@ -390,7 +313,7 @@ const POSTAL_CODE_INPUT_WIDTH = 120; // https://github.com/yannickcr/eslint-plug
           placeholder={cardPlaceholders}
           hideCVC={hideCVC} />
         <ScrollView
-          ref={this.formRef}
+          ref="Form"
           horizontal={!verticalFields}
           keyboardShouldPersistTaps="always"
           scrollEnabled={allowScroll}
