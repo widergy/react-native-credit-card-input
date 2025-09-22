@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import PropTypes from "prop-types";
 import {
   View,
+  Text,
   StyleSheet,
   Image,
   LayoutAnimation,
@@ -71,7 +72,7 @@ export default class LiteCreditCardInput extends Component {
 
     placeholders: PropTypes.object,
 
-    inputStyle: PropTypes.any,
+    inputStyle: Text.propTypes.style,
 
     validColor: PropTypes.string,
     invalidColor: PropTypes.string,
@@ -92,12 +93,6 @@ export default class LiteCreditCardInput extends Component {
     additionalInputsProps: {},
   };
 
-  constructor(props) {
-    super(props);
-    this.fieldRefs = {};
-    this._setFieldRef = this._setFieldRef.bind(this);
-  }
-
   componentDidMount = () => this._focus(this.props.focused);
 
   componentWillReceiveProps = newProps => {
@@ -109,9 +104,7 @@ export default class LiteCreditCardInput extends Component {
 
   _focus = field => {
     if (!field) return;
-    if (this.fieldRefs[field] && typeof this.fieldRefs[field].focus === "function") {
-      this.fieldRefs[field].focus();
-    }
+    this.refs[field].focus();
     LayoutAnimation.easeInEaseOut();
   }
 
@@ -126,7 +119,7 @@ export default class LiteCreditCardInput extends Component {
     return {
       inputStyle: [s.input, inputStyle],
       validColor, invalidColor, placeholderColor,
-      field,
+      ref: field, field,
 
       placeholder: placeholders[field],
       value: values[field],
@@ -136,12 +129,6 @@ export default class LiteCreditCardInput extends Component {
       additionalInputProps: additionalInputsProps[field],
     };
   };
-
-  _setFieldRef(field) {
-    return ref => {
-      this.fieldRefs[field] = ref;
-    };
-  }
 
   _iconToShow = () => {
     const { focused, values: { type } } = this.props;
