@@ -4,6 +4,8 @@ import { View, Text, TextInput, TouchableOpacity, StyleSheet } from "react-nativ
 
 const s = StyleSheet.create({
   baseInputStyle: { color: "black" },
+  rowContainer: { flexDirection: "row", alignItems: "center" },
+  iconContainer: { marginLeft: 8 },
 });
 
 export default class CCInput extends Component {
@@ -106,7 +108,7 @@ export default class CCInput extends Component {
       <TouchableOpacity onPress={this.focus} activeOpacity={0.99}>
         <View style={[containerStyle]}>
           {!!label && <Text style={[labelStyle]}>{label}</Text>}
-          <View style={{ flexDirection: "row", alignItems: "center" }}>
+          <View style={s.rowContainer}>
             <TextInput
               {...restAdditionalProps}
               ref={this.inputRef}
@@ -133,7 +135,7 @@ export default class CCInput extends Component {
               onFocus={this._onFocus}
               onSubmitEditing={this._onSubmitEditing}
               onChangeText={this._onChange} />
-            {RightIcon && <View style={{ marginLeft: 8 }}>{RightIcon}</View>}
+            {RightIcon && <View style={s.iconContainer}>{RightIcon}</View>}
           </View>
         </View>
       </TouchableOpacity>
