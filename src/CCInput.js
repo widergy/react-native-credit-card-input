@@ -4,6 +4,8 @@ import { View, Text, TextInput, TouchableOpacity, StyleSheet } from "react-nativ
 
 const s = StyleSheet.create({
   baseInputStyle: { color: "black" },
+  rowContainer: { flexDirection: "row", alignItems: "center" },
+  iconContainer: { marginLeft: 8 },
 });
 
 export default class CCInput extends Component {
@@ -32,6 +34,7 @@ export default class CCInput extends Component {
     secureTextEntry: PropTypes.bool,
     isLast: PropTypes.bool,
     additionalInputProps: PropTypes.object,
+    RightIcon: PropTypes.element,
   };
 
   static defaultProps = {
@@ -87,6 +90,7 @@ export default class CCInput extends Component {
       additionalInputProps,
       secureTextEntry,
       isLast,
+      RightIcon,
     } = this.props;
     let restAdditionalProps = {};
     let additionalStyle = undefined;
@@ -104,31 +108,35 @@ export default class CCInput extends Component {
       <TouchableOpacity onPress={this.focus} activeOpacity={0.99}>
         <View style={[containerStyle]}>
           {!!label && <Text style={[labelStyle]}>{label}</Text>}
-          <TextInput
-            {...restAdditionalProps}
-            ref={this.inputRef}
-            keyboardType={keyboardType}
-            autoCapitalize="words"
-            autoCorrect={false}
-            secureTextEntry={secureTextEntry}
-            returnKeyType={isLast ? "done" : "next"}
-            style={[
-              s.baseInputStyle,
-              inputStyle,
-              (validColor && status === "valid")
-                ? { color: validColor }
-                : (invalidColor && status === "invalid")
-                ? { color: invalidColor }
-                : {},
-              additionalStyle,
-            ]}
-            underlineColorAndroid={"transparent"}
-            placeholderTextColor={placeholderColor}
-            placeholder={placeholder}
-            value={value}
-            onFocus={this._onFocus}
-            onSubmitEditing={this._onSubmitEditing}
-            onChangeText={this._onChange} />
+          <View style={s.rowContainer}>
+            <TextInput
+              {...restAdditionalProps}
+              ref={this.inputRef}
+              keyboardType={keyboardType}
+              autoCapitalize="words"
+              autoCorrect={false}
+              secureTextEntry={secureTextEntry}
+              returnKeyType={isLast ? "done" : "next"}
+              style={[
+                s.baseInputStyle,
+                inputStyle,
+                (validColor && status === "valid")
+                  ? { color: validColor }
+                  : (invalidColor && status === "invalid")
+                  ? { color: invalidColor }
+                  : {},
+                additionalStyle,
+                RightIcon && { flex: 1 },
+              ]}
+              underlineColorAndroid={"transparent"}
+              placeholderTextColor={placeholderColor}
+              placeholder={placeholder}
+              value={value}
+              onFocus={this._onFocus}
+              onSubmitEditing={this._onSubmitEditing}
+              onChangeText={this._onChange} />
+            {RightIcon && <View style={s.iconContainer}>{RightIcon}</View>}
+          </View>
         </View>
       </TouchableOpacity>
     );

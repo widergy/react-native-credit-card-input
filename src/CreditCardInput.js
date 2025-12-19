@@ -262,6 +262,7 @@ const POSTAL_CODE_INPUT_WIDTH = 120; // https://github.com/yannickcr/eslint-plug
       onSubmitEditing,
 
       additionalInputProps: additionalInputsProps[field],
+      RightIcon: additionalInputsProps[field] && additionalInputsProps[field].RightIcon,
     };
   };
 
